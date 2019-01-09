@@ -15,20 +15,40 @@ No:
 """
 import docopt
 from pymonad.Either import *
-
+from pymonad.List import *
 
 def parse_file(file_path):
     """Extracts contact details from a vcard file."""
+    lines = _read_file(file_path)
+    if lines.getValue() == [] or isinstance(lines, Error):
+        return lines
+    return (_check_lines * lines).getValue()
+
+def _check_lines(lines):
+    if len(lines) == 1:
+        return Error(ValueError('Not a vCard file'))
+    if lines[0] != 'BEGIN:VCARD':
+        return Error(ValueError('First line is not BEGIN:VCARD'))
+    if lines[-1] != 'END:VCARD':
+        return Error(ValueError('Last line is not BEGIN:VCARD'))
+    if lines[1] != 'PRODID:-//Apple Inc.//Mac OS X 10.14.1//EN':
+        return Error(ValueError('Unrecognised line %s' % lines[1]))
+    return lines
+
+def _read_file(file_path):
+    """Read all physical lines of the file and turn them into logical vCard lines."""
+    lines = []
     try:
-        with open(file_path, 'rb') as vcard:
-            line = vcard.readline()
-            if not line:
-                return Result([])
-            if line != 'BEGIN:VCARD':
-                raise ValueError('not a Vcard file')
-    except Exception as Message:
+        with open(file_path, 'r') as vcard:
+            while True:
+                line = vcard.readline()
+                if not line:
+                    break
+                lines.append(line.rstrip('\n'))
+    except (TypeError, FileNotFoundError) as Message:
         return Error(Message)
-    return Result([])
+    return Result(lines)
 
 if __name__ == '__main__':
     pass
+
