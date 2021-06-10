@@ -36,10 +36,10 @@ class TestParser(unittest.TestCase):
         result = parser.parse_file('tests/test_files/single_contact_one_bad_field.txt')
         assert isinstance(result, Error)
 
-        # single contact, one good field
-        # single contact, one good field, whitespace before and after
+        # single contact, one email field
+        # single contact, one email field, whitespace before and after
         # single contact, multiple bad fields
-        # single contact, multiple good fields
+        # single contact, multiple email fields
         # multiple contacts
         # multiple contacts, whitespace between
         # TEST LINEWRAPPING
